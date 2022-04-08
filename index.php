@@ -3,15 +3,22 @@
 
 include_once('connect.php');
 
+$id  = 0;
+$qtd = 0;
 $del = 0;
 $calculo = 0;
 $total = 0;
+$result = "";
+$result2 = "";
+
 
 if (!isset($_SESSION['carrinho'])) {
 
     $_SESSION['carrinho'] = array();
   
 }
+
+
 
 if (isset($_GET['id'])) {
 
@@ -25,16 +32,6 @@ if (isset($_GET['id'])) {
       }
 
 }
-
-
-if (isset($_GET['del'])) {
-
-    $del = $_GET['del'];
-    unset($_SESSION['carrinho'][$del]);
-
-    
-}
-
 
 if (isset($_POST['buscar'])) {
 
@@ -50,8 +47,24 @@ if (isset($_POST['buscar'])) {
       }
 }
 
-$result = "";
-$result2 = "";
+if (isset($_GET['del'])) {
+
+    $del = $_GET['del'];
+    unset($_SESSION['carrinho'][$del]);
+
+    
+}
+
+if ($_GET['acao'] == 'up') {
+    
+    foreach ($_POST['produto'] as $id => $qtd) {
+
+        $id = intval($id);
+        $qtd = intval($qtd);
+    }
+    
+}
+
 
 $sql = "SELECT * FROM produtos";
 
@@ -66,8 +79,9 @@ while ($rows = mysqli_fetch_assoc($res)) {
                     <td>' . $rows['qtd'] . '</td>
                     <td>R$ ' . number_format($rows['preco'] ,"2",",",".") . '</td>
                     <td><a href="?id=' . $rows['barra'] . '">ADICIONAR</a></td>
-                </tr>';
+                 </tr>';
 }
+
 
 ?>
 
@@ -129,6 +143,7 @@ while ($rows = mysqli_fetch_assoc($res)) {
 
         <div style="margin-top: 50px;">
 
+        <form action="?acao=up" method="post">
 
             <table class="table table-primary">
                 <thead class="thead-dark">
@@ -159,10 +174,12 @@ while ($rows = mysqli_fetch_assoc($res)) {
                         echo '<td>' . $resultado['id'] . '</td>';
                         echo '<td>' . $resultado['nome'] . '</td>';
                         echo '<td>' . $resultado['barra'] . '</td>';
-                        echo '<td>' . $qtd . '</td>';
+                        echo '<td><input class="form-control" type="text" name="produto[' .$resultado['id']. ']" value="' . $qtd . '" style="width:50px; text-align:center" /></td>';
                         echo '<td>R$ ' . number_format($resultado['preco'],"2",",",".") . '</td>';
                         echo '<td>R$ ' . number_format($calculo ,"2",",",",") . '</td>';
-                        echo '<td><a href="?del=' . $resultado['barra'] . '">DELETE</a></td>';
+                        echo '<td><a class="btn btn-primary" href="?del=' . $resultado['barra'] . '">DELETE</a>
+                                  <button class="btn btn-danger" type="submit">ATUALIZAÇÃO</button>
+                              </td>';
                         echo '</tr>';
                     }
 
@@ -176,6 +193,7 @@ while ($rows = mysqli_fetch_assoc($res)) {
 
                 </tr>
             </table>
+        </form>
         </div>
 </body>
 
