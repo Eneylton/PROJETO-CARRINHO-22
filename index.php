@@ -4,31 +4,49 @@
 include_once('connect.php');
 
 $del = 0;
+$calculo = 0;
 
-if (isset($_SESSION['venda'])) {
-} else {
-    $_SESSION['venda'] = array();
+if (!isset($_SESSION['carrinho'])) {
+
+    $_SESSION['carrinho'] = array();
+  
 }
 
-    if (isset($_GET['id'])) {
+if (isset($_GET['id'])) {
 
-        $_SESSION['venda'][$_GET['id']] = 1;
-    }
+    if (!isset($_SESSION['carrinho'][$_GET['id']])) {
+
+        $_SESSION['carrinho'][$_GET['id']] = 1;
+
+      } else {
+
+        $_SESSION['carrinho'][$_GET['id']] += 1;
+      }
+
+}
 
 
 if (isset($_GET['del'])) {
 
     $del = $_GET['del'];
-    unset($_SESSION['venda'][$del]);
+    unset($_SESSION['carrinho'][$del]);
 
+    
 }
+
 
 if (isset($_POST['buscar'])) {
 
     $codigo = filter_input(INPUT_POST, 'buscar', FILTER_UNSAFE_RAW);
-    
-    $_SESSION['venda'][$codigo] = 1;
 
+    if (!isset($_SESSION['carrinho'][$codigo])) {
+
+        $_SESSION['carrinho'][$codigo] = 1;
+
+      } else {
+
+        $_SESSION['carrinho'][$codigo] += 1;
+      }
 }
 
 $result = "";
@@ -73,75 +91,84 @@ while ($rows = mysqli_fetch_assoc($res)) {
         <p>CARRINHO PARA PDV</p>
 
         <form method="post">
-        <div class="input-group input-group-sm" style="width: 300px;">
-              <input type="text" name="buscar" class="form-control float-right" placeholder="Pesquisar...." autofocus>
-              <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-search"></i>
-                </button>
-        </div>
-        
+            <div class="row">
+                <div class="col-6">
+                    <input type="text" name="buscar" class="form-control float-right" placeholder="Pesquisar...." autofocus>
+                </div>
+                <div class="col-6">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-search"></i> Adiciona
+                    </button>
+                </div>
+
+
+            </div>
         </form>
-        <table class="table table-success">
-            <thead class="thead-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>NOME</th>
-                    <th>BARRA</th>
-                    <th>QTD</th>
-                    <th>VALOR</th>
-                    <th>AÇÕES</th>
+        <div style="margin-top: 20px;">
 
-                </tr>
-            </thead>
-            <tbody>
+            <table class="table table-success">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>NOME</th>
+                        <th>BARRA</th>
+                        <th>QTD</th>
+                        <th>VALOR</th>
+                        <th>AÇÕES</th>
 
-                <?= $result ?>
+                    </tr>
+                </thead>
+                <tbody>
 
-            </tbody>
-        </table>
+                    <?= $result ?>
 
-        <div style="margin-top: 120px;">
-            </hr>
+                </tbody>
+            </table>
         </div>
 
-        <table class="table table-primary">
-            <thead class="thead-dark">
-                <tr>
-                    <th>CÓDIGO</th>
-                    <th>PRODUTO</th>
-                    <th>BARRA</th>
-                    <th>QTD</th>
-                    <th>VALOR</th>
-                    <th>AÇÕES</th>
-                </tr>
-            </thead>
-            <tbody>
-            
+        <div style="margin-top: 50px;">
 
-                <?php
 
-                foreach ($_SESSION['venda'] as $prod => $qtd){
+            <table class="table table-primary">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>CÓDIGO</th>
+                        <th>PRODUTO</th>
+                        <th>BARRA</th>
+                        <th>QTD</th>
+                        <th>VALOR</th>
+                        <th>SUBTOTAL</th>
+                        <th>AÇÕES</th>
+                    </tr>
+                </thead>
+                <tbody>
 
-                    $sql2 = "SELECT * FROM produtos WHERE barra='$prod'";
-                    $res2 = mysqli_query($conn, $sql2);
-                    $resultado = mysqli_fetch_assoc($res2);
 
-                    echo '<tr>';
-                    echo '<td>'.$resultado['id'].'</td>';
-                    echo '<td>'.$resultado['nome'].'</td>';
-                    echo '<td>'.$resultado['barra'].'</td>';
-                    echo '<td>'.$resultado['qtd'].'</td>';
-                    echo '<td>'.$resultado['preco'].'</td>';
-                    echo '<td><a href="?del='.$resultado['barra'].'">DELETE</a></td>';
-                    echo '</tr>';
+                    <?php
 
-                }
+                    foreach ($_SESSION['carrinho'] as $prod => $qtd) {
 
-                ?>
+                        $sql2 = "SELECT * FROM produtos WHERE barra='$prod'";
+                        $res2 = mysqli_query($conn, $sql2);
+                        $resultado = mysqli_fetch_assoc($res2);
+                        $calculo = $qtd * $resultado['preco'];
 
-            </tbody>
-        </table>
-    </div>
+                        echo '<tr>';
+                        echo '<td>' . $resultado['id'] . '</td>';
+                        echo '<td>' . $resultado['nome'] . '</td>';
+                        echo '<td>' . $resultado['barra'] . '</td>';
+                        echo '<td>' . $qtd . '</td>';
+                        echo '<td>R$ ' . number_format($resultado['preco'],"2",",",".") . '</td>';
+                        echo '<td>R$ ' . number_format($calculo ,"2",",",",") . '</td>';
+                        echo '<td><a href="?del=' . $resultado['barra'] . '">DELETE</a></td>';
+                        echo '</tr>';
+                    }
+
+                    ?>
+
+                </tbody>
+            </table>
+        </div>
 </body>
 
 </html>
