@@ -42,8 +42,11 @@ while ($rows = mysqli_fetch_assoc($res)) {
 
     $result .= ' <tr>
                     <td>' . $rows['id'] . '</td>
-                    <td>' . $rows['descricao'] . '</td>
-                    <td><a href="?id=' . $rows['id'] . '">ADICIONAR</a></td>
+                    <td>' . $rows['nome'] . '</td>
+                    <td>' . $rows['barra'] . '</td>
+                    <td>' . $rows['qtd'] . '</td>
+                    <td>' . $rows['preco'] . '</td>
+                    <td><a href="?id=' . $rows['barra'] . '">ADICIONAR</a></td>
                 </tr>';
 }
 
@@ -66,7 +69,7 @@ while ($rows = mysqli_fetch_assoc($res)) {
 <body>
 
     <div class="container">
-        <h2>Basic Table</h2>
+        <h2>PDV DESENVOLVIMENTO</h2>
         <p>CARRINHO PARA PDV</p>
 
         <form method="post">
@@ -83,6 +86,9 @@ while ($rows = mysqli_fetch_assoc($res)) {
                 <tr>
                     <th>ID</th>
                     <th>NOME</th>
+                    <th>BARRA</th>
+                    <th>QTD</th>
+                    <th>VALOR</th>
                     <th>AÇÕES</th>
 
                 </tr>
@@ -103,6 +109,8 @@ while ($rows = mysqli_fetch_assoc($res)) {
                 <tr>
                     <th>CÓDIGO</th>
                     <th>PRODUTO</th>
+                    <th>BARRA</th>
+                    <th>QTD</th>
                     <th>VALOR</th>
                     <th>AÇÕES</th>
                 </tr>
@@ -114,26 +122,22 @@ while ($rows = mysqli_fetch_assoc($res)) {
 
                 foreach ($_SESSION['venda'] as $prod => $qtd){
 
-                    $sql2 = "SELECT * FROM produtos WHERE descricao='$prod'";
+                    $sql2 = "SELECT * FROM produtos WHERE barra='$prod'";
                     $res2 = mysqli_query($conn, $sql2);
                     $resultado = mysqli_fetch_assoc($res2);
 
                     echo '<tr>';
                     echo '<td>'.$resultado['id'].'</td>';
-                    echo '<td>'.$resultado['descricao'].'</td>';
+                    echo '<td>'.$resultado['nome'].'</td>';
+                    echo '<td>'.$resultado['barra'].'</td>';
+                    echo '<td>'.$resultado['qtd'].'</td>';
                     echo '<td>'.$resultado['preco'].'</td>';
-                    echo '<td><a href="?del='.$resultado['descricao'].'">DELETE</a></td>';
+                    echo '<td><a href="?del='.$resultado['barra'].'">DELETE</a></td>';
                     echo '</tr>';
 
                 }
 
                 ?>
-
-                
-                    
-                   
-                  
-
 
             </tbody>
         </table>

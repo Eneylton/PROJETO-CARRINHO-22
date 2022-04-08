@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 07-Abr-2022 às 21:13
+-- Tempo de geração: 08-Abr-2022 às 16:47
 -- Versão do servidor: 10.4.18-MariaDB
 -- versão do PHP: 7.3.28
 
@@ -29,7 +29,9 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `produtos` (
   `id` int(11) NOT NULL,
-  `descricao` varchar(45) DEFAULT NULL,
+  `nome` varchar(100) DEFAULT NULL,
+  `barra` varchar(45) DEFAULT NULL,
+  `qtd` varchar(100) DEFAULT NULL,
   `preco` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -37,9 +39,9 @@ CREATE TABLE `produtos` (
 -- Extraindo dados da tabela `produtos`
 --
 
-INSERT INTO `produtos` (`id`, `descricao`, `preco`) VALUES
-(1, 'COXIM', '2.00'),
-(2, 'BIELETA', '4.00');
+INSERT INTO `produtos` (`id`, `nome`, `barra`, `qtd`, `preco`) VALUES
+(1, 'COXIM DE ETIOS', '7891342013024', '1', '2.00'),
+(2, 'AMORTECEDOR GOL', '7899674019394', '1', '4.00');
 
 --
 -- Índices para tabelas despejadas
