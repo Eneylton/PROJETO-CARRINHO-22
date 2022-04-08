@@ -10,7 +10,6 @@ if (isset($_SESSION['venda'])) {
     $_SESSION['venda'] = array();
 }
 
-
     if (isset($_GET['id'])) {
 
         $_SESSION['venda'][$_GET['id']] = 1;
@@ -21,6 +20,14 @@ if (isset($_GET['del'])) {
 
     $del = $_GET['del'];
     unset($_SESSION['venda'][$del]);
+
+}
+
+if (isset($_POST['buscar'])) {
+
+    $codigo = filter_input(INPUT_POST, 'buscar', FILTER_UNSAFE_RAW);
+    
+    $_SESSION['venda'][$codigo] = 1;
 
 }
 
@@ -61,6 +68,16 @@ while ($rows = mysqli_fetch_assoc($res)) {
     <div class="container">
         <h2>Basic Table</h2>
         <p>CARRINHO PARA PDV</p>
+
+        <form method="post">
+        <div class="input-group input-group-sm" style="width: 300px;">
+              <input type="text" name="buscar" class="form-control float-right" placeholder="Pesquisar...." autofocus>
+              <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-search"></i>
+                </button>
+        </div>
+        
+        </form>
         <table class="table table-success">
             <thead class="thead-dark">
                 <tr>
@@ -97,7 +114,7 @@ while ($rows = mysqli_fetch_assoc($res)) {
 
                 foreach ($_SESSION['venda'] as $prod => $qtd){
 
-                    $sql2 = "SELECT * FROM produtos WHERE id='$prod'";
+                    $sql2 = "SELECT * FROM produtos WHERE descricao='$prod'";
                     $res2 = mysqli_query($conn, $sql2);
                     $resultado = mysqli_fetch_assoc($res2);
 
@@ -105,7 +122,7 @@ while ($rows = mysqli_fetch_assoc($res)) {
                     echo '<td>'.$resultado['id'].'</td>';
                     echo '<td>'.$resultado['descricao'].'</td>';
                     echo '<td>'.$resultado['preco'].'</td>';
-                    echo '<td><a href="?del='.$resultado['id'].'">DELETE</a></td>';
+                    echo '<td><a href="?del='.$resultado['descricao'].'">DELETE</a></td>';
                     echo '</tr>';
 
                 }
@@ -116,7 +133,7 @@ while ($rows = mysqli_fetch_assoc($res)) {
                     
                    
                   
-              
+
 
             </tbody>
         </table>
