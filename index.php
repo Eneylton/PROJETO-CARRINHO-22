@@ -5,6 +5,7 @@ include_once('connect.php');
 
 $del = 0;
 $calculo = 0;
+$total = 0;
 
 if (!isset($_SESSION['carrinho'])) {
 
@@ -63,7 +64,7 @@ while ($rows = mysqli_fetch_assoc($res)) {
                     <td>' . $rows['nome'] . '</td>
                     <td>' . $rows['barra'] . '</td>
                     <td>' . $rows['qtd'] . '</td>
-                    <td>' . $rows['preco'] . '</td>
+                    <td>R$ ' . number_format($rows['preco'] ,"2",",",".") . '</td>
                     <td><a href="?id=' . $rows['barra'] . '">ADICIONAR</a></td>
                 </tr>';
 }
@@ -152,6 +153,7 @@ while ($rows = mysqli_fetch_assoc($res)) {
                         $res2 = mysqli_query($conn, $sql2);
                         $resultado = mysqli_fetch_assoc($res2);
                         $calculo = $qtd * $resultado['preco'];
+                        $total +=$calculo;
 
                         echo '<tr>';
                         echo '<td>' . $resultado['id'] . '</td>';
@@ -167,6 +169,12 @@ while ($rows = mysqli_fetch_assoc($res)) {
                     ?>
 
                 </tbody>
+                <tr>
+                
+                <td colspan="5" style="text-align:right;"><span> TOTAL</span></td>
+                <td colspan="2"><span style="text-align: rigth;">R$ <?= number_format($total,"2",",",".") ?></span></td>
+
+                </tr>
             </table>
         </div>
 </body>
