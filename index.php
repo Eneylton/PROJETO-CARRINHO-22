@@ -8,29 +8,18 @@ $qtd = 0;
 $del = 0;
 $calculo = 0;
 $total = 0;
+$porcento = 0;
+$valor_base = 0;
+$produto = 0;
+$sub = 0;
 $result = "";
 $result2 = "";
+$desconto = "";
 
 
 if (!isset($_SESSION['carrinho'])) {
 
     $_SESSION['carrinho'] = array();
-  
-}
-
-
-
-if (isset($_GET['id'])) {
-
-    if (!isset($_SESSION['carrinho'][$_GET['id']])) {
-
-        $_SESSION['carrinho'][$_GET['id']] = 1;
-
-      } else {
-
-        $_SESSION['carrinho'][$_GET['id']] += 1;
-      }
-
 }
 
 if (isset($_POST['buscar'])) {
@@ -41,28 +30,41 @@ if (isset($_POST['buscar'])) {
 
         $_SESSION['carrinho'][$codigo] = 1;
 
-      } else {
+    } else {
 
         $_SESSION['carrinho'][$codigo] += 1;
-      }
-}
-
-if (isset($_GET['del'])) {
-
-    $del = $_GET['del'];
-    unset($_SESSION['carrinho'][$del]);
-
-    
-}
-
-if ($_GET['acao'] == 'up') {
-    
-    foreach ($_POST['produto'] as $id => $qtd) {
-
-        $id = intval($id);
-        $qtd = intval($qtd);
     }
+}
+
+if (isset($_GET['id'])) {
+
+    if (!isset($_SESSION['carrinho'][$_GET['id']])) {
+
+        $_SESSION['carrinho'][$_GET['id']] = 1;
+    } else {
+
+        $_SESSION['carrinho'][$_GET['id']] += 1;
+    }
+}
+
+if(isset($_GET['acao'])){
+
+    if ($_GET['acao'] == 'edit') {
+
+        foreach ($_POST['produto'] as $codigo => $qtd) {
     
+            $codigo = intval($codigo);
+            $qtd = intval($qtd);
+    
+            if (!empty($qtd) || $qtd != 0) {
+    
+                $_SESSION['carrinho'][$codigo] = $qtd;
+            } else {
+    
+                unset($_SESSION['carrinho'][$codigo]);
+            }
+        }
+    }
 }
 
 
@@ -73,13 +75,13 @@ $res = mysqli_query($conn, $sql);
 while ($rows = mysqli_fetch_assoc($res)) {
 
     $result .= ' <tr>
-                    <td>' . $rows['id'] . '</td>
-                    <td>' . $rows['nome'] . '</td>
-                    <td>' . $rows['barra'] . '</td>
-                    <td>' . $rows['qtd'] . '</td>
-                    <td>R$ ' . number_format($rows['preco'] ,"2",",",".") . '</td>
-                    <td><a href="?id=' . $rows['barra'] . '">ADICIONAR</a></td>
-                 </tr>';
+<td>' . $rows['id'] . '</td>
+<td>' . $rows['nome'] . '</td>
+<td>' . $rows['barra'] . '</td>
+<td>' . $rows['qtd'] . '</td>
+<td>R$ ' . number_format($rows['preco'], "2", ",", ".") . '</td>
+<td><a href="?id=' . $rows['barra'] . '">ADICIONAR</a></td>
+</tr>';
 }
 
 
@@ -143,57 +145,111 @@ while ($rows = mysqli_fetch_assoc($res)) {
 
         <div style="margin-top: 50px;">
 
-        <form action="?acao=up" method="post">
+            <form action="?acao=edit" method="post">
 
-            <table class="table table-primary">
-                <thead class="thead-dark">
+                <table class="table table-primary">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>CÓDIGO</th>
+                            <th>PRODUTO</th>
+                            <th>BARRA</th>
+                            <th>QTD</th>
+                            <th>VALOR</th>
+                            <th>SUBTOTAL</th>
+                            <th>DESCONTO</th>
+                            <th>AÇÕES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        <?php
+
+
+
+                        foreach ($_SESSION['carrinho'] as $prod => $qtd) {
+
+                            $sql2 = "SELECT * FROM produtos WHERE barra='$prod'";
+
+                                $res2 = mysqli_query($conn, $sql2);
+
+                                $resultado = mysqli_fetch_assoc($res2);
+
+                                $sub = $qtd * $resultado['preco'];
+
+                                $total += $sub;
+
+                            if(isset($_POST['porcent'][$prod])){
+
+                                $porcento = $_POST['porcent'][$prod];
+
+                            if($porcento != ""){
+
+                                $sql2 = "SELECT * FROM produtos WHERE barra='$prod'";
+
+                                $res2 = mysqli_query($conn, $sql2);
+
+                                $resultado = mysqli_fetch_assoc($res2);
+
+                                $calculo = $qtd * $resultado['preco'];
+
+                                $sub  = $calculo  - ($calculo  * $porcento / 100);
+
+                                $total += $sub;
+
+                            }else{
+
+                                $sql2 = "SELECT * FROM produtos WHERE barra='$prod'";
+
+                                $res2 = mysqli_query($conn, $sql2);
+
+                                $resultado = mysqli_fetch_assoc($res2);
+
+                                $sub = $qtd * $resultado['preco'];
+
+                                $total += $sub;
+                            }
+
+                            }
+
+                            
+                            echo '<tr>';
+                            echo '<td>' . $resultado['id'] . '</td>';
+                            echo '<td>' . $resultado['nome'] . '</td>';
+                            echo '<td>' . $resultado['barra'] . '</td>';
+                            echo '<td><input class="form-control" type="text" name="produto[' . $resultado['barra'] . ']" value="' . $qtd . '" style="width:50px; text-align:center" /></td>';
+                            echo '<td>R$ ' . number_format($resultado['preco'], "2", ",", ".") . '</td>';
+                            echo '<td>R$ ' . number_format($sub, "2", ",", ",") . '</td>';
+                            echo ' <td style="text-align:left">
+                                  <select class="form-control" name="porcent[' . $resultado['barra'] . ']">
+                                  <option value="">%</option>
+                                  <option value="5">5%</option>
+                                  <option value="10">10%</option>
+                                  <option value="15">15%</option>
+                                  <option value="20">20%</option>
+                                  <option value="50">50%</option>
+                                  </select>
+                                  </td>';
+                            echo '<td>
+
+                            <button class="btn btn-danger" type="submit"><i class="fas fa-pen"></i> EDITAR</button>
+                            &nbsp;&nbsp;
+                             <a class="btn btn-primary" href="acao.php?acao=del&barra=' . $resultado['barra'] . '">DELETE</a>
+                             </td>';
+                            echo '</tr>';
+                        }
+
+                        ?>
+
+                    </tbody>
                     <tr>
-                        <th>CÓDIGO</th>
-                        <th>PRODUTO</th>
-                        <th>BARRA</th>
-                        <th>QTD</th>
-                        <th>VALOR</th>
-                        <th>SUBTOTAL</th>
-                        <th>AÇÕES</th>
+
+                        <td colspan="5" style="text-align:right;"><span> TOTAL</span></td>
+                        <td colspan="3"><span style="text-align: rigth;">R$ <?= number_format($total, "2", ",", ".") ?></span></td>
+
                     </tr>
-                </thead>
-                <tbody>
-
-
-                    <?php
-
-                    foreach ($_SESSION['carrinho'] as $prod => $qtd) {
-
-                        $sql2 = "SELECT * FROM produtos WHERE barra='$prod'";
-                        $res2 = mysqli_query($conn, $sql2);
-                        $resultado = mysqli_fetch_assoc($res2);
-                        $calculo = $qtd * $resultado['preco'];
-                        $total +=$calculo;
-
-                        echo '<tr>';
-                        echo '<td>' . $resultado['id'] . '</td>';
-                        echo '<td>' . $resultado['nome'] . '</td>';
-                        echo '<td>' . $resultado['barra'] . '</td>';
-                        echo '<td><input class="form-control" type="text" name="produto[' .$resultado['id']. ']" value="' . $qtd . '" style="width:50px; text-align:center" /></td>';
-                        echo '<td>R$ ' . number_format($resultado['preco'],"2",",",".") . '</td>';
-                        echo '<td>R$ ' . number_format($calculo ,"2",",",",") . '</td>';
-                        echo '<td><a class="btn btn-primary" href="?del=' . $resultado['barra'] . '">DELETE</a>
-                                  <button class="btn btn-danger" type="submit">ATUALIZAÇÃO</button>
-                              </td>';
-                        echo '</tr>';
-                    }
-
-                    ?>
-
-                </tbody>
-                <tr>
-                
-                <td colspan="5" style="text-align:right;"><span> TOTAL</span></td>
-                <td colspan="2"><span style="text-align: rigth;">R$ <?= number_format($total,"2",",",".") ?></span></td>
-
-                </tr>
-            </table>
-        </form>
+                </table>
+            </form>
         </div>
 </body>
 
